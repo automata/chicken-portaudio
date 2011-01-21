@@ -1,0 +1,3 @@
+* Chicken Scheme bindings to PortAudio
+
+It's not working for now... :-(

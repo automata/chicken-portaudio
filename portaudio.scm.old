@@ -1,0 +1,649 @@
+(import chicken scheme foreign)
+(use foreigners)
+
+#>
+int Pa_GetVersion (void);
+<#
+
+(define pa-get-version
+  (foreign-lambda integer "Pa_GetVersion"))
+
+#>
+const char* Pa_GetVersionText (void);
+<#
+
+(define pa-get-version-text
+  (foreign-lambda (const c-string) "Pa_GetVersionText"))
+
+#>
+typedef int PaError;
+<#
+
+(define-foreign-type pa-error integer)
+
+#>
+typedef enum PaErrorCode
+{
+    paNoError = 0,
+
+    paNotInitialized = -10000,
+    paUnanticipatedHostError,
+    paInvalidChannelCount,
+    paInvalidSampleRate,
+    paInvalidDevice,
+    paInvalidFlag,
+    paSampleFormatNotSupported,
+    paBadIODeviceCombination,
+    paInsufficientMemory,
+    paBufferTooBig,
+    paBufferTooSmall,
+    paNullCallback,
+    paBadStreamPtr,
+    paTimedOut,
+    paInternalError,
+    paDeviceUnavailable,
+    paIncompatibleHostApiSpecificStreamInfo,
+    paStreamIsStopped,
+    paStreamIsNotStopped,
+    paInputOverflowed,
+    paOutputUnderflowed,
+    paHostApiNotFound,
+    paInvalidHostApi,
+    paCanNotReadFromACallbackStream,      /**< @todo review error code name */
+    paCanNotWriteToACallbackStream,       /**< @todo review error code name */
+    paCanNotReadFromAnOutputOnlyStream,   /**< @todo review error code name */
+    paCanNotWriteToAnInputOnlyStream,     /**< @todo review error code name */
+    paIncompatibleStreamHostApi,
+    paBadBufferPtr
+} PaErrorCode;
+<#
+
+(define-foreign-enum-type (pa-error-code (enum "PaErrorCode"))
+  (constructor: make-pa-error-code)
+  (integer paNoError                               pa-no-error)
+  (integer paNotInitialized                        pa-not-initialized)
+  (integer paInvalidChannelCount                   pa-invalid-channel-count)
+  (integer paInvalidSampleRate                     pa-invalid-sample-rate)
+  (integer paInvalidDevice                         pa-invalid-device)
+  (integer paInvalidFlag                           pa-invalid-flag)
+  (integer paSampleFormatNotSupported              pa-sample-format-not-supported)
+  (integer paBadIODeviceCombination                pa-bad-io-device-combination)
+  (integer paInsufficientMemory                    pa-insufficient-memory)
+  (integer paBufferTooBig                          pa-buffer-too-big)
+  (integer paBufferTooSmall                        pa-buffer-too-small)
+  (integer paNullCallback                          pa-null-callback)
+  (integer paBadStreamPtr                          pa-bad-stream-ptr)
+  (integer paTimedOut                              pa-timed-out)
+  (integer paInternalError                         pa-internal-error)
+  (integer paDeviceUnavailable                     pa-device-unavailable)
+  (integer paIncompatibleHostApiSpecificStreamInfo pa-incompatible-host-api-specific-stream-info)
+  (integer paStreamIsStopped                       pa-stream-is-stopped)
+  (integer paStreamIsNotStopped                    pa-stream-is-not-stopped)
+  (integer paInputOverflowed                       pa-input-overflowed)
+  (integer paOutputUnderflowed                     pa-output-underflowed)
+  (integer paHostApiNotFound                       pa-host-api-not-found)
+  (integer paInvalidHostApi                        pa-invalid-host-api)
+  (integer paCanNotReadFromACallbackStream         pa-can-not-read-from-a-callback-stream)
+  (integer paCanNotWriteToACallbackStream          pa-can-not-write-to-a-callback-stream)
+  (integer paCanNotReadFromAnOutputOnlyStream      pa-can-not-read-from-an-output-only-stream)
+  (integer paCanNotWriteToAnInputOnlyStream        pa-can-not-write-to-an-input-only-stream)
+  (integer paIncompatibleStreamHostApi             pa-incompatible-stream-host-api)
+  (integer paBadBufferPtr                          pa-bad-buffer-ptr))
+
+#>
+const char *Pa_GetErrorText( PaError errorCode );
+<#
+
+(define pa-get-error-text
+  (foreign-lambda (const c-string) "Pa_GetErrorText" pa-error))
+
+#>
+PaError Pa_Initialize( void );
+<#
+
+(define pa-initialize
+  (foreign-lambda pa-error "Pa_Initialize"))
+
+#>
+PaError Pa_Terminate( void );
+<#
+
+(define pa-terminate
+  (foreign-lambda pa-error "Pa_Terminate"))
+
+#>
+typedef int PaDeviceIndex;
+<#
+
+(define-foreign-type pa-device-index integer)
+
+#>
+#define paNoDevice ((PaDeviceIndex)-1)
+#define paUseHostApiSpecificDeviceSpecification ((PaDeviceIndex)-2)
+<#
+
+#>
+typedef int PaHostApiIndex;
+<#
+
+(define-foreign-type pa-host-api-index integer)
+
+#>
+PaHostApiIndex Pa_GetHostApiCount( void );
+<#
+
+(define pa-get-host-api-count
+  (foreign-lambda pa-host-api-index "Pa_GetHostApiCount"))
+
+#>
+PaHostApiIndex Pa_GetDefaultHostApi( void );
+<#
+
+(define pa-get-default-host-api
+  (foreign-lambda pa-host-api-index "Pa_GetDefaultHostApi"))
+
+#>
+typedef enum PaHostApiTypeId
+{
+    paInDevelopment=0, /* use while developing support for a new host API */
+    paDirectSound=1,
+    paMME=2,
+    paASIO=3,
+    paSoundManager=4,
+    paCoreAudio=5,
+    paOSS=7,
+    paALSA=8,
+    paAL=9,
+    paBeOS=10,
+    paWDMKS=11,
+    paJACK=12,
+    paWASAPI=13,
+    paAudioScienceHPI=14
+} PaHostApiTypeId;
+
+<#
+
+(define-foreign-enum-type (pa-host-api-type-id (enum "PaHostApiTypeId"))
+  (constructor: make-pa-host-api-type-id)
+  (integer paInDevelopment      pa-in-development?)
+  (integer paDirectSound        pa-direct-sound)
+  (integer paMME                pa-mme)
+  (integer paASIO               pa-asio)
+  (integer paSoundManager       pa-sound-manager)
+  (integer paCoreAudio          pa-core-audio)
+  (integer paOSS                pa-oss)
+  (integer paALSA               pa-alsa)
+  (integer paAL                 pa-al)
+  (integer paBeOS               pa-beos)
+  (integer paWDMKS              pa-wdmks)
+  (integer paJACK               pa-jack)
+  (integer paWASAPI             pa-wasapi)
+  (integer paAudioScienceHPI    pa-audio-science-hpi))
+
+#>
+typedef struct PaHostApiInfo
+{
+    int structVersion;
+    PaHostApiTypeId type;
+    const char *name;
+    int deviceCount;
+    PaDeviceIndex defaultInputDevice;
+    PaDeviceIndex defaultOutputDevice;
+    
+} PaHostApiInfo;
+<#
+
+(define-foreign-record-type (pa-host-api-info "PaHostApiInfo")
+  (constructor: make-pa-host-api-info)
+  (integer structVersion struct-version struct-version-set!)
+  (pa-host-api-type-id type type type-set!)
+  ((const c-string) name name name-set!)
+  (integer deviceCount device-count device-count-set!)
+  (pa-device-index defaultInputDevice default-input-device default-input-device-set!)
+  (pa-device-index defaultOutputDevice default-output-device default-output-device-set!))
+
+#>
+const PaHostApiInfo * Pa_GetHostApiInfo( PaHostApiIndex hostApi );
+<#
+
+(define pa-get-host-api-info
+  (foreign-lambda (const pa-host-api-info) "Pa_GetHostApiInfo" pa-host-api-index))
+
+#>
+PaHostApiIndex Pa_HostApiTypeIdToHostApiIndex( PaHostApiTypeId type );
+<#
+
+(define pa-host-api-type-id-to-host-api-index
+  (foreign-lambda pa-host-api-index "Pa_HostApiTypeIdToHostApiIndex" pa-host-api-type-id))
+
+#>
+PaDeviceIndex Pa_HostApiDeviceIndexToDeviceIndex( PaHostApiIndex hostApi,
+        int hostApiDeviceIndex );
+<#
+
+(define pa-host-api-device-index-to-device-index
+  (foreign-lambda pa-device-index "Pa_HostApiDeviceIndexToDeviceIndex" pa-host-api-index integer))
+
+#>
+typedef struct PaHostErrorInfo{
+    PaHostApiTypeId hostApiType;    /**< the host API which returned the error code */
+    long errorCode;                 /**< the error code returned */
+    const char *errorText;          /**< a textual description of the error if available, otherwise a zero-length string */
+}PaHostErrorInfo;
+<#
+
+(define-foreign-record-type (pa-host-error-info "PaHostErrorInfo")
+  (constructor: make-pa-host-error-info)
+  (pa-host-api-type-id hostApiType host-api-type host-api-type-set!)
+  (long errorCode error-code error-code-set!)
+  ((const c-string) errorText error-text error-text-set!))
+
+#>
+const PaHostErrorInfo* Pa_GetLastHostErrorInfo( void );
+<#
+
+(define pa-get-last-host-error-info
+  (foreign-lambda (const (pointer pa-host-error-info)) "Pa_GetLastHostErrorInfo"))
+
+#>
+PaDeviceIndex Pa_GetDeviceCount( void );
+<#
+
+(define pa-get-device-count
+  (foreign-lambda pa-device-index "Pa_GetDeviceCount"))
+
+#>
+PaDeviceIndex Pa_GetDefaultInputDevice( void );
+<#
+
+(define pa-get-default-input-device
+  (foreign-lambda pa-device-index "Pa_GetDefaultInputDevice"))
+
+#>
+PaDeviceIndex Pa_GetDefaultOutputDevice( void );
+<#
+
+(define pa-get-default-output-device
+  (foreign-lambda pa-device-index "Pa_GetDefaultOutputDevice"))
+
+#>
+typedef double PaTime;
+<#
+
+(define-foreign-type pa-time double)
+
+#>
+typedef unsigned long PaSampleFormat;
+<#
+
+(define-foreign-type pa-sample-format unsigned-long)
+
+#>
+#define paFloat32        ((PaSampleFormat) 0x00000001) /**< @see PaSampleFormat */
+#define paInt32          ((PaSampleFormat) 0x00000002) /**< @see PaSampleFormat */
+#define paInt24          ((PaSampleFormat) 0x00000004) /**< Packed 24 bit format. @see PaSampleFormat */
+#define paInt16          ((PaSampleFormat) 0x00000008) /**< @see PaSampleFormat */
+#define paInt8           ((PaSampleFormat) 0x00000010) /**< @see PaSampleFormat */
+#define paUInt8          ((PaSampleFormat) 0x00000020) /**< @see PaSampleFormat */
+#define paCustomFormat   ((PaSampleFormat) 0x00010000)/**< @see PaSampleFormat */
+
+#define paNonInterleaved ((PaSampleFormat) 0x80000000)
+<#
+
+#>
+typedef struct PaDeviceInfo
+{
+    int structVersion;  /* this is struct version 2 */
+    const char *name;
+    PaHostApiIndex hostApi; /* note this is a host API index, not a type id*/
+    
+    int maxInputChannels;
+    int maxOutputChannels;
+
+    /* Default latency values for interactive performance. */
+    PaTime defaultLowInputLatency;
+    PaTime defaultLowOutputLatency;
+    /* Default latency values for robust non-interactive applications (eg. playing sound files). */
+    PaTime defaultHighInputLatency;
+    PaTime defaultHighOutputLatency;
+
+    double defaultSampleRate;
+} PaDeviceInfo;
+<#
+
+(define-foreign-record-type (pa-device-info "PaDeviceInfo")
+  (constructor: make-pa-device-info)
+  (integer structVersion struct-version struct-verstion-set!)
+  ((const c-string) name name name-set!)
+  (pa-host-api-index hostApi host-api host-api-set!)
+  (integer maxInputChannels max-input-channels max-input-channels-set!)
+  (integer maxOutputChannels max-output-channels max-output-channels-set!)
+  (pa-time defaultLowInputLatency default-low-input-latency default-low-input-latency-set!)
+  (pa-time defaultLowOutputLatency default-low-output-latency default-low-output-latency-set!)
+  (pa-time defaultHighInputLatency default-high-input-latency default-high-input-latency-set!)
+  (pa-time defaultHighOutputLatency default-high-output-latency default-high-output-latency-set!)
+  (double defaultSampleRate default-sample-rate default-sample-rate-set!))
+
+#>
+const PaDeviceInfo* Pa_GetDeviceInfo( PaDeviceIndex device );
+<#
+
+(define pa-get-device-info
+  (foreign-lambda (const (c-pointer pa-device-info)) "Pa_GetDeviceInfo" pa-device-index))
+
+#>
+typedef struct PaStreamParameters
+{
+    PaDeviceIndex device;
+    int channelCount;
+    PaSampleFormat sampleFormat;
+    PaTime suggestedLatency;
+    void *hostApiSpecificStreamInfo;
+
+} PaStreamParameters;
+<#
+
+(define-foreign-record-type (pa-stream-parameters "PaStreamParameters")
+  (constructor: make-pa-stream-parameters)
+  (pa-device-index device device device-set!)
+  (integer channelCount channel-count channel-count-set!)
+  (pa-sample-format sampleFormat sample-format sample-format-set!)
+  (pa-time suggestedLatency suggested-latency suggested-latency-set!)
+  ((c-pointer void) hostApiSpecificStreamInfo host-api-specific-stream-info host-api-specific-strem-info-set!))
+
+#>
+#define paFormatIsSupported (0)
+<#
+
+#>
+PaError Pa_IsFormatSupported( const PaStreamParameters *inputParameters,
+                              const PaStreamParameters *outputParameters,
+                              double sampleRate );
+<#
+
+(define pa-is-format-supported
+  (foreign-lambda pa-error "Pa_IsFormatSupported" 
+                  (const pa-stream-parameters) 
+                  (const pa-stream-parameters) 
+                  double))
+
+#>
+typedef void PaStream;
+<#
+
+(define-foreign-type pa-stream void)
+
+#>
+#define paFramesPerBufferUnspecified  (0)
+<#
+
+#>
+typedef unsigned long PaStreamFlags;
+<#
+
+(define-foreign-type pa-stream-flags unsigned-long)
+
+#>
+#define   paNoFlag          ((PaStreamFlags) 0)
+#define   paClipOff         ((PaStreamFlags) 0x00000001)
+#define   paDitherOff       ((PaStreamFlags) 0x00000002)
+#define   paNeverDropInput  ((PaStreamFlags) 0x00000004)
+#define   paPrimeOutputBuffersUsingStreamCallback ((PaStreamFlags) 0x00000008)
+#define   paPlatformSpecificFlags ((PaStreamFlags)0xFFFF0000)
+<#
+
+#>
+typedef struct PaStreamCallbackTimeInfo{
+    PaTime inputBufferAdcTime;
+    PaTime currentTime;
+    PaTime outputBufferDacTime;
+} PaStreamCallbackTimeInfo;
+<#
+
+(define-foreign-record-type (pa-stream-callback-time-info "PaStreamCallbackTimeInfo")
+  (constructor: make-pa-stream-callback-time-info)
+  (pa-time inputBufferAdcTime input-buffer-adc-time input-buffer-adc-time-set!)
+  (pa-time currentTime current-time current-time-set!)
+  (pa-time outputBufferDacTime output-buffer-dac-time output-buffer-dac-time-set!))
+
+#>
+typedef unsigned long PaStreamCallbackFlags;
+<#
+
+(define-foreign-type pa-stream-callback-flags unsigned-long)
+
+#>
+#define paInputUnderflow   ((PaStreamCallbackFlags) 0x00000001)
+#define paInputOverflow    ((PaStreamCallbackFlags) 0x00000002)
+#define paOutputUnderflow  ((PaStreamCallbackFlags) 0x00000004)
+#define paOutputOverflow   ((PaStreamCallbackFlags) 0x00000008)
+#define paPrimingOutput    ((PaStreamCallbackFlags) 0x00000010)
+<#
+
+#>
+typedef enum PaStreamCallbackResult
+{
+    paContinue=0,
+    paComplete=1,
+    paAbort=2
+} PaStreamCallbackResult;
+<#
+
+(define-foreign-enum-type (pa-stream-callback-result (enum "PaStreamCallbackResult"))
+  (constructor: make-pa-stream-callback-result)
+  (integer paContinue                              pa-continue)
+  (integer paComplete                              pa-complete)
+  (integer paAbort                                 pa-abort))
+
+;; FIXME
+
+#>
+typedef int PaStreamCallback(
+    const void *input, void *output,
+    unsigned long frameCount,
+    const PaStreamCallbackTimeInfo* timeInfo,
+    PaStreamCallbackFlags statusFlags,
+    void *userData );
+<#
+
+;; FIXME
+
+#>
+PaError Pa_OpenStream( PaStream** stream,
+                       const PaStreamParameters *inputParameters,
+                       const PaStreamParameters *outputParameters,
+                       double sampleRate,
+                       unsigned long framesPerBuffer,
+                       PaStreamFlags streamFlags,
+                       PaStreamCallback *streamCallback,
+                       void *userData );
+<#
+
+(define pa-open-stream
+  (foreign-lambda pa-error "Pa_OpenStream"
+                  (c-pointer pa-stream)
+                  (const pa-stream-parameters)
+                  (const pa-stream-parameters)
+                  double
+                  unsigned-long
+                  pa-stream-flags
+                  (c-pointer "PaStreamCallback") ;; FIXME! ele esperava na verdade PaStreamCallback *
+                  (c-pointer void)))
+
+#>
+PaError Pa_OpenDefaultStream( PaStream** stream,
+                              int numInputChannels,
+                              int numOutputChannels,
+                              PaSampleFormat sampleFormat,
+                              double sampleRate,
+                              unsigned long framesPerBuffer,
+                              PaStreamCallback *streamCallback,
+                              void *userData );
+<#
+
+(define pa-open-default-stream
+  (foreign-lambda pa-error "Pa_OpenDefaultStream"
+                  (c-pointer pa-stream)
+                  integer
+                  integer
+                  pa-sample-format
+                  double
+                  unsigned-long
+                  (c-pointer "PaStreamCallback") ;; FIXME! ele esperava na verdade PaStreamCallback *
+                  (c-pointer void)))
+
+#>
+PaError Pa_CloseStream( PaStream *stream );
+<#
+
+(define pa-close-stream
+  (foreign-lambda pa-error "Pa_CloseStream"
+                  (c-pointer pa-stream)))
+
+;; FIXME
+
+#>
+typedef void PaStreamFinishedCallback( void *userData );
+<#
+
+;; FIXME
+
+#>
+PaError Pa_SetStreamFinishedCallback( PaStream *stream, PaStreamFinishedCallback* streamFinishedCallback ); 
+<#
+
+(define pa-set-stream-finished-callback
+  (foreign-lambda pa-error "Pa_SetStreamFinishedCallback"
+                  (c-pointer pa-stream)
+                  (c-pointer "PaStreamFinishedCallback") ;; FIXME! ele esperava na verdade PaStreamFinishedCallback *
+                  ))
+
+#>
+PaError Pa_StartStream( PaStream *stream );
+<#
+
+(define pa-start-stream
+  (foreign-lambda pa-error "Pa_StartStream" (c-pointer pa-stream)))
+
+#>
+PaError Pa_StopStream( PaStream *stream );
+<#
+
+(define pa-stop-stream
+  (foreign-lambda pa-error "Pa_StopStream" (c-pointer pa-stream)))
+
+#>
+PaError Pa_AbortStream( PaStream *stream );
+<#
+
+(define pa-abort-stream
+  (foreign-lambda pa-error "Pa_AbortStream" (c-pointer pa-stream)))
+
+#>
+PaError Pa_IsStreamStopped( PaStream *stream );
+<#
+
+(define pa-is-stream-stopped
+  (foreign-lambda pa-error "Pa_IsStreamStopped" (c-pointer pa-stream)))
+
+#>
+PaError Pa_IsStreamActive( PaStream *stream );
+<#
+
+(define pa-is-stream-active
+  (foreign-lambda pa-error "Pa_IsStreamActive" (c-pointer pa-stream)))
+
+#>
+typedef struct PaStreamInfo
+{
+    int structVersion;
+    PaTime inputLatency;
+    PaTime outputLatency;
+    double sampleRate;
+} PaStreamInfo;
+<#
+
+(define-foreign-record-type (pa-stream-info "PaStreamInfo")
+  (constructor: make-pa-stream-info)
+  (integer structVersion struct-version struct-version-set!)
+  (pa-time inputLatency input-latency input-latency-set!)
+  (pa-time outputLatency output-latency output-latency-set!)
+  (double sampleRate sample-rate sample-rate-set!))
+
+#>
+const PaStreamInfo* Pa_GetStreamInfo( PaStream *stream );
+<#
+
+(define pa-get-stream-info
+  (foreign-lambda (const (c-pointer pa-stream-info)) "Pa_GetStreamInfo"
+                  (c-pointer pa-stream)))
+
+#>
+PaTime Pa_GetStreamTime( PaStream *stream );
+<#
+
+(define pa-get-stream-time
+  (foreign-lambda pa-time "Pa_GetStreamTime"
+                  (c-pointer pa-stream)))
+
+#>
+PaTime Pa_GetStreamCpuLoad( PaStream *stream );
+<#
+
+(define pa-get-stream-cpu-load
+  (foreign-lambda pa-time "Pa_GetStreamCpuLoad"
+                  (c-pointer pa-stream)))
+
+#>
+PaError Pa_ReadStream( PaStream* stream,
+                       void *buffer,
+                       unsigned long frames );
+<#
+
+(define pa-read-stream
+  (foreign-lambda pa-error "Pa_ReadStream"
+                  (c-pointer pa-stream)
+                  (c-pointer void)
+                  unsigned-long))
+
+#>
+PaError Pa_WriteStream( PaStream* stream,
+                        void *buffer,
+                        unsigned long frames );
+<#
+
+(define pa-write-stream
+  (foreign-lambda pa-error "Pa_WriteStream"
+                  (c-pointer pa-stream)
+                  (c-pointer void)
+                  unsigned-long))
+
+#>
+signed long Pa_GetStreamReadAvailable( PaStream* stream );
+<#
+
+(define pa-get-stream-read-available
+  (foreign-lambda long "Pa_GetStreamReadAvailable" ;; FIXME: signed long??
+                  (c-pointer pa-stream)))
+
+#>
+signed long Pa_GetStreamWriteAvailable( PaStream* stream );
+<#
+
+(define pa-get-stream-write-available
+  (foreign-lambda long "Pa_GetStreamWriteAvailable" ;; FIXME: signed long??
+                  (c-pointer pa-stream)))
+
+#>
+PaError Pa_GetSampleSize( PaSampleFormat format );
+<#
+
+(define pa-get-sample-size
+  (foreign-lambda pa-error "Pa_GetSampleSize" pa-sample-format))
+
+#>
+void Pa_Sleep( long msec );
+<#
+
+(define pa-sleep
+  (foreign-lambda void "Pa_Sleep" long))
