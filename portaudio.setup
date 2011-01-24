@@ -1,0 +1,7 @@
+(compile -s -O2 -d1 portaudio.scm -L -lportaudio -J)
+(compile -s -O2 -d0 portaudio.import.scm)
+
+(install-extension
+ 'portaudio
+ '("portaudio.so" "portaudio.import.so")
+ '((version "0.0.1")))
